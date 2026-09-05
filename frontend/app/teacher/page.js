@@ -1,171 +1,171 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-Send,
-BookOpen,
-Sparkles,
-Loader2,
-ArrowLeft,
-Brain,
-ClipboardCheck,
+  Send,
+  BookOpen,
+  Sparkles,
+  Loader2,
+  ArrowLeft,
+  Brain,
+  ClipboardCheck,
 } from "lucide-react";
 import AppShell from "../components/layout/AppShell";
 import { apiRequest } from "../../src/lib/api";
 
-export default function TeacherPage() {
-const searchParams = useSearchParams();
-const router = useRouter();
+function TeacherPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-const topicFromUrl = searchParams.get("topic");
-const subjectFromUrl = searchParams.get("subject");
+  const topicFromUrl = searchParams.get("topic");
+  const subjectFromUrl = searchParams.get("subject");
 
-const [topic, setTopic] = useState(
-topicFromUrl || "Learning Topic"
-);
-
-const [subject, setSubject] = useState(
-subjectFromUrl || "Machine Learning"
-);
-
-const [message, setMessage] = useState("");
-const [messages, setMessages] = useState([]);
-const [sessionId, setSessionId] = useState(null);
-const [loading, setLoading] = useState(false);
-const [initializing, setInitializing] = useState(true);
-const [error, setError] = useState("");
-
-// Update topic and subject if URL parameters change
-useEffect(() => {
-setTopic(topicFromUrl || "Learning Topic");
-setSubject(subjectFromUrl || "Machine Learning");
-}, [topicFromUrl, subjectFromUrl]);
-
-// Start learning session
-useEffect(() => {
-if (!topicFromUrl || !subjectFromUrl) {
-setInitializing(false);
-return;
-}
-
-
-startLearningSession();
-
-
-}, [topicFromUrl, subjectFromUrl]);
-
-const startLearningSession = async () => {
-try {
-setInitializing(true);
-setError("");
-
-
-  const data = await apiRequest("/api/teacher/chat", {
-    method: "POST",
-    body: JSON.stringify({
-      topic: topicFromUrl,
-      subject: subjectFromUrl,
-      message: `Teach me ${topicFromUrl} from the beginning. Explain it clearly and simply.`,
-      sessionId: null,
-    }),
-  });
-
-  setSessionId(data.sessionId);
-
-  setMessages([
-    {
-      role: "assistant",
-      content: data.response,
-    },
-  ]);
-} catch (error) {
-  console.error("Teacher initialization error:", error);
-
-  setError(
-    error.message || "Unable to start learning session."
-  );
-} finally {
-  setInitializing(false);
-}
-
-
-};
-
-// Send student message
-const sendMessage = async () => {
-const trimmedMessage = message.trim();
-
-
-if (!trimmedMessage || loading) {
-  return;
-}
-
-const userMessage = {
-  role: "user",
-  content: trimmedMessage,
-};
-
-setMessages((previous) => [...previous, userMessage]);
-setMessage("");
-setLoading(true);
-setError("");
-
-try {
-  const data = await apiRequest("/api/teacher/chat", {
-    method: "POST",
-    body: JSON.stringify({
-      topic,
-      subject,
-      message: trimmedMessage,
-      sessionId,
-    }),
-  });
-
-  setSessionId(data.sessionId);
-
-  setMessages((previous) => [
-    ...previous,
-    {
-      role: "assistant",
-      content: data.response,
-    },
-  ]);
-} catch (error) {
-  console.error("Teacher chat error:", error);
-
-  setError(
-    error.message || "Unable to get teacher response."
+  const [topic, setTopic] = useState(
+    topicFromUrl || "Learning Topic"
   );
 
-  // Remove the user's message if request failed
-  setMessages((previous) => previous.slice(0, -1));
-} finally {
-  setLoading(false);
-}
+  const [subject, setSubject] = useState(
+    subjectFromUrl || "Machine Learning"
+  );
+
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [sessionId, setSessionId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+  const [error, setError] = useState("");
+
+  // Update topic and subject if URL parameters change
+  useEffect(() => {
+    setTopic(topicFromUrl || "Learning Topic");
+    setSubject(subjectFromUrl || "Machine Learning");
+  }, [topicFromUrl, subjectFromUrl]);
+
+  // Start learning session
+  useEffect(() => {
+    if (!topicFromUrl || !subjectFromUrl) {
+      setInitializing(false);
+      return;
+    }
 
 
-};
+    startLearningSession();
 
-// Enter sends message
-// Shift + Enter creates a new line
-const handleKeyDown = (event) => {
-if (event.key === "Enter" && !event.shiftKey) {
-event.preventDefault();
-sendMessage();
-}
-};
 
-// Start quiz
-const startQuiz = () => {
-router.push(
-`/quizzes?topic=${encodeURIComponent(
+  }, [topicFromUrl, subjectFromUrl]);
+
+  const startLearningSession = async () => {
+    try {
+      setInitializing(true);
+      setError("");
+
+
+      const data = await apiRequest("/api/teacher/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          topic: topicFromUrl,
+          subject: subjectFromUrl,
+          message: `Teach me ${topicFromUrl} from the beginning. Explain it clearly and simply.`,
+          sessionId: null,
+        }),
+      });
+
+      setSessionId(data.sessionId);
+
+      setMessages([
+        {
+          role: "assistant",
+          content: data.response,
+        },
+      ]);
+    } catch (error) {
+      console.error("Teacher initialization error:", error);
+
+      setError(
+        error.message || "Unable to start learning session."
+      );
+    } finally {
+      setInitializing(false);
+    }
+
+
+  };
+
+  // Send student message
+  const sendMessage = async () => {
+    const trimmedMessage = message.trim();
+
+
+    if (!trimmedMessage || loading) {
+      return;
+    }
+
+    const userMessage = {
+      role: "user",
+      content: trimmedMessage,
+    };
+
+    setMessages((previous) => [...previous, userMessage]);
+    setMessage("");
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await apiRequest("/api/teacher/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          topic,
+          subject,
+          message: trimmedMessage,
+          sessionId,
+        }),
+      });
+
+      setSessionId(data.sessionId);
+
+      setMessages((previous) => [
+        ...previous,
+        {
+          role: "assistant",
+          content: data.response,
+        },
+      ]);
+    } catch (error) {
+      console.error("Teacher chat error:", error);
+
+      setError(
+        error.message || "Unable to get teacher response."
+      );
+
+      // Remove the user's message if request failed
+      setMessages((previous) => previous.slice(0, -1));
+    } finally {
+      setLoading(false);
+    }
+
+
+  };
+
+  // Enter sends message
+  // Shift + Enter creates a new line
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
+  };
+
+  // Start quiz
+  const startQuiz = () => {
+    router.push(
+      `/quizzes?topic=${encodeURIComponent(
         topic
       )}&subject=${encodeURIComponent(subject)}`
-);
-};
+    );
+  };
 
-return ( <AppShell> <div className="min-h-screen bg-[#07111f] text-white">
+  return (<AppShell> <div className="min-h-screen bg-[#07111f] text-white">
 
 
     {/* Header */}
@@ -317,19 +317,17 @@ return ( <AppShell> <div className="min-h-screen bg-[#07111f] text-white">
               return (
                 <div
                   key={index}
-                  className={`flex ${
-                    isUser
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
+                  className={`flex ${isUser
+                    ? "justify-end"
+                    : "justify-start"
+                    }`}
                 >
 
                   <div
-                    className={`max-w-[88%] rounded-2xl px-5 py-4 ${
-                      isUser
-                        ? "rounded-br-md bg-cyan-500 text-slate-950"
-                        : "rounded-bl-md border border-white/10 bg-[#101d30] text-slate-200"
-                    }`}
+                    className={`max-w-[88%] rounded-2xl px-5 py-4 ${isUser
+                      ? "rounded-br-md bg-cyan-500 text-slate-950"
+                      : "rounded-bl-md border border-white/10 bg-[#101d30] text-slate-200"
+                      }`}
                   >
 
                     {/* Message header */}
@@ -471,8 +469,16 @@ return ( <AppShell> <div className="min-h-screen bg-[#07111f] text-white">
     </div>
 
   </div>
-</AppShell>
+  </AppShell>
 
 
-);
+  );
 }
+
+export default function TeacherPage() {
+  return (
+    <Suspense fallback={null}>
+      <TeacherPageContent />
+    </Suspense>
+  );
+} 

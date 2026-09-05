@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -22,7 +22,7 @@ import {
 import AppShell from "../components/layout/AppShell";
 import { apiRequest } from "@/lib/api";
 
-export default function QuizPage() {
+function QuizPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -368,18 +368,16 @@ export default function QuizPage() {
                           onClick={() =>
                             handleAnswer(current._id, option)
                           }
-                          className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition ${
-                            isSelected
-                              ? "border-blue-500/60 bg-blue-500/10 text-white"
-                              : "border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/20 hover:bg-white/[0.04]"
-                          }`}
+                          className={`flex w-full items-center gap-4 rounded-xl border p-4 text-left transition ${isSelected
+                            ? "border-blue-500/60 bg-blue-500/10 text-white"
+                            : "border-white/10 bg-white/[0.02] text-slate-300 hover:border-white/20 hover:bg-white/[0.04]"
+                            }`}
                         >
                           <span
-                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-sm font-medium ${
-                              isSelected
-                                ? "border-blue-500 bg-blue-500 text-white"
-                                : "border-white/10 bg-white/5 text-slate-400"
-                            }`}
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-sm font-medium ${isSelected
+                              ? "border-blue-500 bg-blue-500 text-white"
+                              : "border-white/10 bg-white/5 text-slate-400"
+                              }`}
                           >
                             {String.fromCharCode(65 + index)}
                           </span>
@@ -476,13 +474,12 @@ export default function QuizPage() {
                         <button
                           key={question._id}
                           onClick={() => goToQuestion(index)}
-                          className={`flex h-9 items-center justify-center rounded-lg border text-xs font-medium transition ${
-                            active
-                              ? "border-blue-500 bg-blue-500 text-white"
-                              : answered
+                          className={`flex h-9 items-center justify-center rounded-lg border text-xs font-medium transition ${active
+                            ? "border-blue-500 bg-blue-500 text-white"
+                            : answered
                               ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                               : "border-white/10 bg-white/[0.02] text-slate-500 hover:bg-white/5"
-                          }`}
+                            }`}
                         >
                           {index + 1}
                         </button>
@@ -606,11 +603,10 @@ export default function QuizPage() {
                         onClick={() =>
                           setNumberOfQuestions(count)
                         }
-                        className={`rounded-xl border px-4 py-3 text-sm font-medium transition ${
-                          numberOfQuestions === count
-                            ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
-                            : "border-white/10 bg-white/[0.02] text-slate-400 hover:bg-white/5"
-                        }`}
+                        className={`rounded-xl border px-4 py-3 text-sm font-medium transition ${numberOfQuestions === count
+                          ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
+                          : "border-white/10 bg-white/[0.02] text-slate-400 hover:bg-white/5"
+                          }`}
                       >
                         {count}
                       </button>
@@ -708,5 +704,13 @@ export default function QuizPage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+export default function QuizPage() {
+  return (
+    <Suspense fallback={null}>
+      <QuizPageContent />
+    </Suspense>
   );
 }

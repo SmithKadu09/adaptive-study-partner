@@ -1036,7 +1036,7 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2">
 
         <a
-          href="/assessment"
+          href="/assessments"
           className="group rounded-2xl border border-slate-800 bg-slate-900/70 p-5 transition hover:border-blue-500/20 hover:bg-slate-900"
         >
           <div className="flex items-center justify-between">

@@ -760,7 +760,6 @@ export default function LearningPage() {
 
 
 
-
 function RecommendationCard({
   item,
   index,

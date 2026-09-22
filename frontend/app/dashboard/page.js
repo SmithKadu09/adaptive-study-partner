@@ -944,7 +944,7 @@ export default function Dashboard() {
               </p>
 
               <a
-                href="/assessment"
+                href="/assessments"
                 className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-blue-400 hover:text-blue-300"
               >
                 Take an assessment

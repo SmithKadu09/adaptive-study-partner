@@ -62,6 +62,7 @@ Return ONLY valid JSON in this exact format:
 
 {
   "subject": "main subject",
+  "analysis": "short analysis of the student's performance",
   "recommendedTopics": [
     {
       "topic": "topic name",
@@ -78,6 +79,7 @@ Rules:
 - Do not recommend topics marked as strong unless they are required as prerequisites.
 - Give between 2 and 5 recommendations.
 - Priority 1 means highest priority.
+- Keep the analysis concise and based only on the supplied performance data.
 `;
 
     const response = await generate(prompt);
@@ -85,24 +87,37 @@ Rules:
     let recommendationData;
 
     try {
-      recommendationData =
-        typeof response === "string"
-          ? JSON.parse(response)
-          : response;
+      if (typeof response === "string") {
+        let cleanedResponse = response.trim();
+
+        // Remove Markdown code fences
+        cleanedResponse = cleanedResponse
+          .replace(/^```json\s*/i, "")
+          .replace(/^```\s*/i, "")
+          .replace(/\s*```$/i, "")
+          .trim();
+
+        // Extract JSON object if the model added extra text
+        const firstBrace = cleanedResponse.indexOf("{");
+        const lastBrace = cleanedResponse.lastIndexOf("}");
+
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          cleanedResponse = cleanedResponse.slice(
+            firstBrace,
+            lastBrace + 1
+          );
+        }
+
+        recommendationData = JSON.parse(cleanedResponse);
+      } else {
+        recommendationData = response;
+      }
     } catch (error) {
       console.error("Recommendation parsing error:", error);
+      console.error("Raw LLM response:", response);
 
       return res.status(500).json({
         message: "Failed to parse learning recommendations",
-      });
-    }
-
-    if (
-      !recommendationData ||
-      !Array.isArray(recommendationData.recommendedTopics)
-    ) {
-      return res.status(500).json({
-        message: "Invalid recommendation response",
       });
     }
 
@@ -149,7 +164,12 @@ Rules:
     res.status(200).json({
       message: "Learning recommendations generated successfully",
       learningProgress,
-      recommendations: learningProgress.recommendedTopics,
+      recommendation: {
+        subject: learningProgress.subject,
+        currentTopic: learningProgress.currentTopic,
+        recommendedTopics: learningProgress.recommendedTopics,
+        analysis: recommendationData.analysis || null,
+      },
     });
   } catch (error) {
     console.error("Get learning recommendations error:", error);

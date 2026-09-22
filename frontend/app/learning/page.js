@@ -773,11 +773,11 @@ function RecommendationCard({
 
   let priority = item.priority;
 
-  if (priority === 3) {
+  if (priority === 1) {
     priority = "high";
   } else if (priority === 2) {
     priority = "medium";
-  } else if (priority === 1) {
+  } else if (priority === 3) {
     priority = "low";
   }
 
